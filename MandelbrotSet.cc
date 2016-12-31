@@ -2,6 +2,7 @@
 #include <complex>
 #include "TStyle.h"
 #include "TCanvas.h"
+#include "TImage.h"
 #include "TLine.h"
 
 int converge(double x, double y, unsigned int maxIterations)
@@ -36,14 +37,16 @@ void MandelbrotSet()
   double xmin=-2.0, xmax=0.6, ymin=-1.3, ymax=1.3;
   // Seahorse valley
   // double xmin=-1.0, xmax=-0.5, ymin=0, ymax=ymin+(xmax-xmin);
-  double granularity=5000;
+  double granularity=1000;
   double maxIterations=1000;
   
   gStyle->SetPalette(1);
   Int_t color=gStyle->GetColorPalette(0);
   
-  TCanvas *c=new TCanvas("c", "c", granularity, granularity);
-  c->Range(xmin, ymin, xmax, ymax);
+  // TCanvas *c=new TCanvas("c", "c", granularity, granularity);
+  // c->Range(xmin, ymin, xmax, ymax);
+  TImage *img=new TImage(granularity, granularity);
+  img->SetEditable();
   
   unsigned int i=0;
   unsigned int total=granularity*granularity;
@@ -52,13 +55,19 @@ void MandelbrotSet()
     for (double y=ymin; y<=ymax; y+=(ymax-ymin)/granularity)
     {
       int iterations=converge(x, y, maxIterations);
-      TLine *point=new TLine(x, y, x, y);
-      point->SetLineColor(color+254.*returnColor(iterations, maxIterations));
-      point->Draw("same");
+      // TLine *point=new TLine(x, y, x, y);
+      // point->SetLineColor(color+254.*returnColor(iterations, maxIterations));
+      // point->Draw("same");
+      if (iterations==maxIterations) img->PutPixel(x, y);
       ++i;
       if (i%(total/10)==0) std::cout<<"Completed "<<i*100./total<<"% "<<std::endl;
     }
   }
+  img->Draw();
   
-  c->SaveAs("MandelbrotSet.png");
+  std::cout<<"Writing to file"<<std::endl;
+  img->WriteImage("MandelbrotSet.png");
+  std::cout<<"Written"<<std::endl;
+  
+  // c->SaveAs("MandelbrotSet.png");
 }
